@@ -10,7 +10,7 @@ const messages = ref([]);
 const messageText = ref("");
 const joined = ref(false);
 const name = ref('');
-const typingDisplay = ref('');
+const typingDisplay = ref('' );
 
 // método
 onBeforeMount(() => {
@@ -24,10 +24,18 @@ onBeforeMount(() => {
   socket.on("message", (message) => {
     messages.value.push(message);
   });
+
+  socket.on('typing', ({ name, isTyping }) => {
+    if (isTyping) {
+      typingDisplay.value = `${name} is typing...`;
+    } else {
+      typingDisplay.value = '';
+    }
+  })
 });
 
 // método
-const join = () = {
+const join = () => {
   socket.emit('join', { name: name.value}, () => {
     joined.value = true;
   })
@@ -69,6 +77,8 @@ const emitTyping = () => {
         </div>
       </div>
 
+      <div v-if="typingDisplay">{{ typingDisplay }}</div>
+
       <div class="message-input">
         <form @submit.prevent="sendMessage">
           <label>Message:</label>
@@ -82,4 +92,19 @@ const emitTyping = () => {
 
 <style>
 @import "./assets/base.css";
+
+.chat {
+  padding: 20px;
+  height: 100vh;
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.messages-container {
+  flex: 1;
+}
 </style>
